@@ -13,7 +13,11 @@ centers = norm.rvs(scale=sigma, size=kcat, random_state=rng)
 cats = randint.rvs(0, kcat, size = n, random_state=rng)
 xobs = np.array([norm.rvs(loc=centers[c], scale=2, random_state=rng) for c in cats])
 
-elbo_list, m, s2, phi = cavi(xobs, kcat, sigma, rng)
+result = cavi(xobs, kcat, sigma, rng=rng)
+elbo_list = result.elbo
+m = result.mean_mat[:, -1]
+s2 = result.s2_mat[:, -1]
+phi = result.phi_arr[:, :, -1]
 
 plt.plot(elbo_list)
 plt.ylabel("ELBO")
