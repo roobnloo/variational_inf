@@ -88,6 +88,7 @@ def k5n500():
     plt.plot(elbo_list)
     plt.ylabel("ELBO")
     plt.xlabel("Iteration")
+    plt.savefig('k5n500elbo.png', bbox_inches='tight', facecolor='white')
     plt.show()
 
     catm = catmap(m, centers)
@@ -105,14 +106,14 @@ def k5n500():
     for i in coords:
         for j in range(kcat):
             ax[i].plot(x, norm.pdf(x, result.mean_mat[j, itermap[i]], 2),
-                    color=viridis(j))
+                       color=viridis(j))
         ax[i].scatter(xobs, [0]*n,
-                    zorder=100, alpha=0.2)
+                      zorder=100, alpha=0.2)
         ax[i].vlines(centers, 0, 0.22, colors=viridis(range(kcat)),
-                    linestyles='dotted')
+                     linestyles='dotted')
         ax[i].set_title(f"Iteration {itermap[i]}")
     fig.set_size_inches(18, 5)
-    fig.savefig('k5n500.png', bbox_inches='tight')
+    fig.savefig('k5n500.png', bbox_inches='tight', facecolor='white')
     plt.show()
 
-# k5n500()
+k5n500()
