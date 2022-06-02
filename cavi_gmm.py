@@ -1,4 +1,5 @@
 import numpy as np
+import scipy as sp
 import math
 from dataclasses import dataclass
 from scipy.stats import norm, uniform
@@ -27,9 +28,12 @@ def elbo(kcat: int, xobs: np.ndarray, sigma, m: np.ndarray, s2: np.ndarray,
 
 
 def update_cluster_assgn(kcat: int, m: np.ndarray, s2: np.ndarray, xi):
-    result = np.array([math.exp(m[k] * xi - (s2[k] + m[k]**2) / 2)
-                       for k in range(kcat)])
-    return result / sum(result)
+    z = [m[k] * xi - (s2[k] + m[k]**2) / 2 for k in range(kcat)]
+    denom = sp.special.logsumexp(z)
+
+    # result = np.array([math.exp(m[k] * xi - (s2[k] + m[k]**2) / 2)
+    #                    for k in range(kcat)])
+    return np.array([math.exp(zk - denom) for zk in z])
 
 
 def update_center(sigma, phi: np.ndarray, xobs: np.ndarray, k):
@@ -61,7 +65,7 @@ def cavi(xobs: np.ndarray, kcat, sigma,
     elbo_list = [0] * max_iter
     elbo_list[0] = -math.inf
     iter = 1
-    while True:
+    while iter < max_iter:
         for i in range(n):
             phi_arr[i, :, iter] = update_cluster_assgn(
                 kcat, mean_mat[:, iter-1], s2_mat[:, iter-1], xobs[i])
@@ -73,6 +77,8 @@ def cavi(xobs: np.ndarray, kcat, sigma,
         if abs(elbo_list[iter] - elbo_list[iter - 1]) < tol:
             break
         iter += 1
+    if iter == max_iter:
+        print("Maximum iteration of {max_iter} exceeded!")
 
     return CaviGmmResult(elbo_list[1:iter+1], mean_mat[:, 0:iter],
                          s2_mat[:, 0:iter], phi_arr[:, :, 0:iter])
